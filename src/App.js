@@ -5,10 +5,11 @@ import Footer from "./components/Footer";
 import Tasks from "./components/Tasks";
 import AddTask from "./components/AddTask";
 import About from "./components/About";
+import NotFound from "./components/NotFound";
 
 function App() {
   const [showAddTask, setShowAddTask] = useState(false)
-
+  const [serverError, setServerError] = useState(false)
   const [tasks, setTasks] = useState([])
 
   useEffect(() => {
@@ -19,19 +20,43 @@ function App() {
     getTasks()
   }, [])
 
-  // Fetch Tasks
-  const fetchTasks = async () => {
-    const res = await fetch('http://localhost:5000/tasks')
-    const data = await res.json()
+  // JSON server route
+
+  // Fatch Task(s)
+  const fetchTasks = async (id=0) => {
+    let data, res
+    if (id===0) {
+      res = await fetch('http://localhost:5000/tasks')
+    } else if (id > 0) {
+      res = await fetch(`http://localhost:5000/tasks/${id}`)
+      if (res.status !== 200) {
+        setServerError(true)
+      } else {
+        setServerError(false)
+      }
+    } else {
+      setServerError(true)
+    }
+    data = await res.json()
     return data
+
   }
 
-  // Fetch Task
-  const fetchTask = async (id) => {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`)
-    const data = await res.json()
-    return data
-  }
+  // Fetch Tasks
+  // const fetchTasks = async () => {
+  //   const res = await fetch('http://localhost:5000/tasks')
+  //   const data = await res.json()
+  //   return data
+  // }
+
+  // // Fetch Task
+  // const fetchTask = async (id) => {
+  //   const res = await fetch(`http://localhost:5000/tasks/${id}`)
+  //   console.log(res)
+  //   const data = await res.json()
+   
+  //   return data
+  // }
 
 
   // Add Task
@@ -62,7 +87,7 @@ function App() {
 
   // Toggle reminder
   const toggleReminder = async (id) => {
-    const taskToToggle = await fetchTask(id)
+    const taskToToggle = await fetchTasks(id)
     const updTask = { ...taskToToggle, reminder: !taskToToggle.reminder }
     const res = await fetch(`http://localhost:5000/tasks/${id}`, {
       method: 'PUT',
@@ -82,7 +107,9 @@ function App() {
 
   return (
     <Router>
-      <div className="container">
+      {
+        !serverError && 
+        <div className="container">
         <Header onAdd={() => setShowAddTask(!showAddTask)} showAdd={showAddTask} />
         <Route path='/' exact render={(props) => (
           <>
@@ -97,6 +124,14 @@ function App() {
         <Route path='/about' component={About} />
         <Footer />
       </div>
+      }
+      {
+        serverError && 
+        <div className="container">
+          <NotFound />
+        </div>
+      }
+      
     </Router>
   );
 }

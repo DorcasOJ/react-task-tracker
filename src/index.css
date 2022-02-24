@@ -118,3 +118,9 @@ footer {
 .link:hover {
   color: green;
 }
+
+.notFound {
+  display: block;
+  color: red;
+  text-align: center;
+}
