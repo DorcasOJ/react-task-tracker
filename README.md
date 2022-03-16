@@ -4,3 +4,4 @@ An application to add and delete a list of tasks
 ## `npm run server`
 To run server
 ### `npm start`
+To run frontend
